@@ -649,12 +649,12 @@ class UTMPopup {
           <div class="history-meta">${this.formatDate(item.createdAt)}</div>
         </div>
         <div class="history-actions">
-          <button class="btn-icon" onclick="popup.copyHistoryItem('${item.id}')" title="Copy">
+          <button class="btn-icon copy-history-btn" data-item-id="${item.id}" title="Copy">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
             </svg>
           </button>
-          <button class="btn-icon" onclick="popup.editHistoryItem('${item.id}')" title="Edit">
+          <button class="btn-icon edit-history-btn" data-item-id="${item.id}" title="Edit">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
             </svg>
@@ -662,6 +662,36 @@ class UTMPopup {
         </div>
       </div>
     `).join('');
+    
+    // Add event listeners for history actions using event delegation
+    this.setupHistoryEventListeners();
+  }
+
+  /**
+   * Setup event listeners for history actions
+   */
+  setupHistoryEventListeners() {
+    const historyList = this.elements.historyList;
+    
+    // Remove existing listeners to avoid duplicates
+    historyList.removeEventListener('click', this.handleHistoryClick);
+    
+    // Add event delegation for history actions
+    this.handleHistoryClick = (e) => {
+      const button = e.target.closest('button');
+      if (!button) return;
+      
+      const itemId = button.getAttribute('data-item-id');
+      if (!itemId) return;
+      
+      if (button.classList.contains('copy-history-btn')) {
+        this.copyHistoryItem(itemId);
+      } else if (button.classList.contains('edit-history-btn')) {
+        this.editHistoryItem(itemId);
+      }
+    };
+    
+    historyList.addEventListener('click', this.handleHistoryClick);
   }
 
   /**

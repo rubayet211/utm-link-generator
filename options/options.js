@@ -238,12 +238,12 @@ class OptionsPage {
             <p>Created ${this.formatDate(template.createdAt)}</p>
           </div>
           <div class="template-actions">
-            <button class="btn-icon" onclick="options.editTemplate('${template.id}')" title="Edit">
+            <button class="btn-icon edit-template-btn" data-template-id="${template.id}" title="Edit">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg>
             </button>
-            <button class="btn-icon" onclick="options.deleteTemplate('${template.id}')" title="Delete">
+            <button class="btn-icon delete-template-btn" data-template-id="${template.id}" title="Delete">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
               </svg>
@@ -266,6 +266,36 @@ class OptionsPage {
         </div>
       </div>
     `).join('');
+    
+    // Setup event delegation for template actions
+    this.setupTemplateEventListeners();
+  }
+
+  /**
+   * Setup event listeners for template actions
+   */
+  setupTemplateEventListeners() {
+    const templatesGrid = document.getElementById('templatesGrid');
+    
+    // Remove existing listeners to avoid duplicates
+    templatesGrid.removeEventListener('click', this.handleTemplateClick);
+    
+    // Add event delegation for template actions
+    this.handleTemplateClick = (e) => {
+      const button = e.target.closest('button');
+      if (!button) return;
+      
+      const templateId = button.getAttribute('data-template-id');
+      if (!templateId) return;
+      
+      if (button.classList.contains('edit-template-btn')) {
+        this.editTemplate(templateId);
+      } else if (button.classList.contains('delete-template-btn')) {
+        this.deleteTemplate(templateId);
+      }
+    };
+    
+    templatesGrid.addEventListener('click', this.handleTemplateClick);
   }
 
   /**
