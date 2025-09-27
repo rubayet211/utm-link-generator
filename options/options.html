@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTM Link Generator - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <img src="../assets/icons/icon-48.png" alt="UTM Generator" class="logo-icon">
+          <div class="logo-text">
+            <h1>UTM Link Generator</h1>
+            <p>Professional UTM campaign management</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="premium-status" id="premiumStatus">
+            <span class="status-badge" id="statusBadge">Free</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-button active" data-tab="templates">Templates</button>
+      <button class="tab-button" data-tab="settings">Settings</button>
+      <button class="tab-button" data-tab="integrations">Integrations</button>
+      <button class="tab-button" data-tab="license">License</button>
+      <button class="tab-button" data-tab="about">About</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Templates Tab -->
+      <div class="tab-content active" id="templates">
+        <div class="section">
+          <div class="section-header">
+            <h2>UTM Templates</h2>
+            <button class="btn btn-primary" id="addTemplateBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+              Add Template
+            </button>
+          </div>
+          <p class="section-description">
+            Create reusable templates to enforce naming conventions and speed up UTM creation.
+          </p>
+          
+          <div class="templates-grid" id="templatesGrid">
+            <div class="empty-state">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+              </svg>
+              <h3>No templates yet</h3>
+              <p>Create your first template to get started</p>
+            </div>
+          </div>
+          
+          <div class="upgrade-notice" id="templateUpgradeNotice">
+            <div class="notice-content">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>You've reached the free limit of 5 templates. <a href="#" id="upgradeTemplatesLink">Upgrade to Pro</a> for unlimited templates.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="tab-content" id="settings">
+        <div class="section">
+          <h2>Default Values</h2>
+          <p class="section-description">Set default values for UTM parameters to speed up link creation.</p>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="defaultSource" class="label">Default Source</label>
+              <input type="text" id="defaultSource" class="input" placeholder="e.g., newsletter, social">
+              <p class="help-text">Default value for utm_source parameter</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="defaultMedium" class="label">Default Medium</label>
+              <input type="text" id="defaultMedium" class="input" placeholder="e.g., email, cpc, social">
+              <p class="help-text">Default value for utm_medium parameter</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Validation Rules</h2>
+          <p class="section-description">Configure how UTM parameters are validated and formatted.</p>
+          
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-content">
+                <h3>Enforce Lowercase</h3>
+                <p>Automatically convert all UTM parameters to lowercase</p>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="lowercaseEnforced">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-content">
+                <h3>Hyphenate Spaces</h3>
+                <p>Replace spaces with hyphens in UTM parameters</p>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="hyphenateSpaces">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-content">
+                <h3>Auto-copy to Clipboard</h3>
+                <p>Automatically copy generated URLs to clipboard</p>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="autoCopy">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-actions">
+            <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+            <button class="btn btn-secondary" id="resetSettingsBtn">Reset to Defaults</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrations Tab -->
+      <div class="tab-content" id="integrations">
+        <div class="section">
+          <h2>Google Sheets Integration</h2>
+          <div class="premium-feature" id="sheetsIntegration">
+            <div class="premium-overlay">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <p>Requires Pro Subscription</p>
+            </div>
+            
+            <p class="section-description">
+              Automatically append generated UTM links to a Google Sheets spreadsheet for tracking and analysis.
+            </p>
+            
+            <div class="integration-card">
+              <div class="integration-header">
+                <div class="integration-info">
+                  <h3>Google Sheets</h3>
+                  <p class="integration-status" id="sheetsStatus">Not Connected</p>
+                </div>
+                <div class="integration-actions">
+                  <button class="btn btn-primary" id="connectSheetsBtn" disabled>Connect</button>
+                </div>
+              </div>
+              
+              <div class="integration-config" id="sheetsConfig" style="display: none;">
+                <div class="form-group">
+                  <label for="sheetId" class="label">Spreadsheet ID</label>
+                  <input type="text" id="sheetId" class="input" placeholder="Enter Google Sheets ID">
+                  <p class="help-text">Find this in your Google Sheets URL after /spreadsheets/d/</p>
+                </div>
+                
+                <div class="form-group">
+                  <label for="sheetName" class="label">Sheet Name</label>
+                  <input type="text" id="sheetName" class="input" placeholder="Sheet1" value="Sheet1">
+                </div>
+                
+                <div class="integration-actions">
+                  <button class="btn btn-primary" id="saveSheetsBtn">Save Configuration</button>
+                  <button class="btn btn-secondary" id="testSheetsBtn">Test Connection</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Export Options</h2>
+          <div class="premium-feature" id="exportOptions">
+            <div class="premium-overlay">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <p>Requires Pro Subscription</p>
+            </div>
+            
+            <p class="section-description">
+              Export your UTM link history and bulk generate multiple links at once.
+            </p>
+            
+            <div class="export-actions">
+              <button class="btn btn-secondary" id="exportCSVBtn" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h8l6-6V4c0-1.1-.9-2-2-2zm4 18l-4-4h4v4zm-2-6V4H6v16h10v-6z"/>
+                </svg>
+                Export to CSV
+              </button>
+              <button class="btn btn-secondary" id="bulkGenerateBtn" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Bulk Generate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- License Tab -->
+      <div class="tab-content" id="license">
+        <div class="section">
+          <div class="license-status" id="licenseStatusCard">
+            <div class="status-card free">
+              <div class="status-header">
+                <div class="status-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div class="status-info">
+                  <h3 id="licenseStatusTitle">Free Plan</h3>
+                  <p id="licenseStatusDescription">You're using the free version of UTM Link Generator</p>
+                </div>
+              </div>
+              
+              <div class="feature-comparison">
+                <h4>Current Features</h4>
+                <ul class="feature-list">
+                  <li class="feature-item available">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Basic UTM generation
+                  </li>
+                  <li class="feature-item available">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Up to 5 templates
+                  </li>
+                  <li class="feature-item available">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    50 history entries
+                  </li>
+                  <li class="feature-item unavailable">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    Unlimited templates
+                  </li>
+                  <li class="feature-item unavailable">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    Bulk generation & CSV export
+                  </li>
+                  <li class="feature-item unavailable">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    Google Sheets integration
+                  </li>
+                  <li class="feature-item unavailable">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    Team collaboration
+                  </li>
+                </ul>
+                
+                <div class="upgrade-action">
+                  <button class="btn btn-primary" id="upgradeBtn">Upgrade to Pro - $9.99/month</button>
+                  <p class="upgrade-description">Unlock all features and remove limitations</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="licenseActivation">
+          <h2>License Activation</h2>
+          <p class="section-description">
+            Enter your Pro license key to activate premium features.
+          </p>
+          
+          <div class="license-form">
+            <div class="form-group">
+              <label for="licenseKey" class="label">License Key</label>
+              <input type="text" id="licenseKey" class="input" placeholder="Enter your license key">
+              <p class="help-text">License keys are provided after purchase</p>
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-primary" id="activateLicenseBtn">
+                <span id="activateText">Activate License</span>
+                <div id="activateSpinner" class="spinner hidden"></div>
+              </button>
+              <button class="btn btn-secondary" id="deactivateLicenseBtn" style="display: none;">Deactivate</button>
+            </div>
+            
+            <div class="license-status-message" id="licenseMessage"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Tab -->
+      <div class="tab-content" id="about">
+        <div class="section">
+          <div class="about-header">
+            <img src="../assets/icons/icon-128.png" alt="UTM Link Generator" class="about-icon">
+            <div class="about-info">
+              <h2>UTM Link Generator</h2>
+              <p class="version">Version 1.0.0</p>
+              <p class="description">Professional UTM campaign management for marketers and analysts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Features</h3>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                </svg>
+              </div>
+              <h4>Smart Generation</h4>
+              <p>Intelligent UTM parameter validation and auto-completion</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                </svg>
+              </div>
+              <h4>Template System</h4>
+              <p>Reusable templates for consistent campaign naming</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                </svg>
+              </div>
+              <h4>History Tracking</h4>
+              <p>Keep track of all generated UTM links with search</p>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+                </svg>
+              </div>
+              <h4>Team Features</h4>
+              <p>Collaborate with team members on campaign management</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Support</h3>
+          <div class="support-links">
+            <a href="#" class="support-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c1.38 0 2.64-.56 3.54-1.47.65.89 1.77 1.47 2.96 1.47 1.97 0 3.5-1.53 3.5-3.5V12c0-5.52-4.48-10-10-10zm0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+              </svg>
+              Documentation & FAQ
+            </a>
+            <a href="#" class="support-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+              Contact Support
+            </a>
+            <a href="#" class="support-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              View Source Code
+            </a>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="legal-links">
+            <a href="#" class="legal-link">Privacy Policy</a>
+            <a href="#" class="legal-link">Terms of Service</a>
+            <a href="#" class="legal-link">License Agreement</a>
+          </div>
+          <p class="copyright">© 2024 UTM Link Generator. All rights reserved.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Template Modal -->
+    <div id="templateModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Add Template</h3>
+          <button id="closeTemplateModal" class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="templateForm">
+            <div class="form-group">
+              <label for="templateNameInput" class="label">Template Name *</label>
+              <input type="text" id="templateNameInput" class="input" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="templateSource" class="label">Source *</label>
+              <input type="text" id="templateSource" class="input" placeholder="e.g., email, social, google" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="templateMedium" class="label">Medium *</label>
+              <input type="text" id="templateMedium" class="input" placeholder="e.g., email, cpc, social" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="templateCampaign" class="label">Campaign Pattern *</label>
+              <input type="text" id="templateCampaign" class="input" placeholder="e.g., newsletter-{date}, promo-{month}" required>
+              <p class="help-text">Use {date}, {month}, {year} for dynamic values</p>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelTemplateBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="notifications"></div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

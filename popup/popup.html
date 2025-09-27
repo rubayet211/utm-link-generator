@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTM Link Generator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="../assets/icons/icon-48.png" alt="UTM Generator" class="logo-icon">
+        <h1 class="title">UTM Link Generator</h1>
+      </div>
+      <div class="badge" id="historyBadge">0</div>
+    </div>
+
+    <!-- Main Form -->
+    <div class="form-section">
+      <form id="utmForm">
+        <!-- Base URL -->
+        <div class="form-group">
+          <label for="baseUrl" class="label">Base URL *</label>
+          <input 
+            type="url" 
+            id="baseUrl" 
+            class="input" 
+            placeholder="https://example.com"
+            required
+          >
+          <button type="button" id="autofillBtn" class="autofill-btn" title="Auto-fill from current page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Template Selection -->
+        <div class="form-group">
+          <label for="templateSelect" class="label">Template</label>
+          <select id="templateSelect" class="select">
+            <option value="">Select a template...</option>
+          </select>
+        </div>
+
+        <!-- UTM Parameters -->
+        <div class="utm-params">
+          <div class="form-group">
+            <label for="utmSource" class="label">Source *</label>
+            <input 
+              type="text" 
+              id="utmSource" 
+              class="input" 
+              placeholder="google, facebook, newsletter"
+              required
+            >
+            <div class="validation-message" id="sourceValidation"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="utmMedium" class="label">Medium *</label>
+            <input 
+              type="text" 
+              id="utmMedium" 
+              class="input" 
+              placeholder="cpc, email, social"
+              required
+            >
+            <div class="validation-message" id="mediumValidation"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="utmCampaign" class="label">Campaign *</label>
+            <input 
+              type="text" 
+              id="utmCampaign" 
+              class="input" 
+              placeholder="summer-sale, product-launch"
+              required
+            >
+            <div class="validation-message" id="campaignValidation"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="utmTerm" class="label">Term</label>
+            <input 
+              type="text" 
+              id="utmTerm" 
+              class="input" 
+              placeholder="keyword, phrase"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="utmContent" class="label">Content</label>
+            <input 
+              type="text" 
+              id="utmContent" 
+              class="input" 
+              placeholder="header-link, sidebar-ad"
+            >
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+          <button type="submit" id="generateBtn" class="btn btn-primary">
+            <span id="generateBtnText">Generate UTM Link</span>
+            <div id="generateSpinner" class="spinner hidden"></div>
+          </button>
+          
+          <button type="button" id="saveTemplateBtn" class="btn btn-secondary">
+            Save Template
+          </button>
+        </div>
+      </form>
+
+      <!-- Generated URL Display -->
+      <div id="resultSection" class="result-section hidden">
+        <div class="result-header">
+          <h3>Generated URL</h3>
+          <div class="result-actions">
+            <button id="copyBtn" class="btn-icon" title="Copy to clipboard">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+              </svg>
+            </button>
+            <button id="editBtn" class="btn-icon" title="Edit URL">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="result-url" id="generatedUrl"></div>
+        <div class="success-message" id="successMessage"></div>
+      </div>
+    </div>
+
+    <!-- History Section -->
+    <div class="history-section">
+      <div class="section-header">
+        <h3>Recent Links</h3>
+        <div class="section-actions">
+          <input 
+            type="text" 
+            id="historySearch" 
+            class="search-input" 
+            placeholder="Search history..."
+          >
+          <button id="clearHistoryBtn" class="btn-icon" title="Clear history">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div id="historyList" class="history-list">
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+          </svg>
+          <p>No recent links</p>
+          <span>Generated links will appear here</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button id="optionsBtn" class="btn-link">Settings</button>
+      <span class="divider">•</span>
+      <button id="upgradeBtn" class="btn-link premium-link">Upgrade to Pro</button>
+    </div>
+
+    <!-- Save Template Modal -->
+    <div id="templateModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Save Template</h3>
+          <button id="closeModalBtn" class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="templateName" class="label">Template Name *</label>
+            <input 
+              type="text" 
+              id="templateName" 
+              class="input" 
+              placeholder="My Campaign Template"
+              required
+            >
+          </div>
+          <div class="template-preview">
+            <p class="preview-label">Preview:</p>
+            <div id="templatePreview" class="preview-content"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelTemplateBtn" class="btn btn-secondary">Cancel</button>
+          <button id="saveTemplateConfirmBtn" class="btn btn-primary">Save Template</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Modal -->
+    <div id="premiumModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Premium Feature</h3>
+          <button id="closePremiumModalBtn" class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="premium-content">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="#2563EB">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <h4 id="premiumFeatureTitle">Upgrade to Pro</h4>
+            <p id="premiumFeatureMessage">This feature requires a Pro subscription.</p>
+            <ul class="premium-features">
+              <li>Unlimited templates</li>
+              <li>Bulk generation & CSV export</li>
+              <li>Google Sheets integration</li>
+              <li>Team collaboration</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="dismissPremiumBtn" class="btn btn-secondary">Maybe Later</button>
+          <button id="upgradePremiumBtn" class="btn btn-primary">Upgrade Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

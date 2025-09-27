@@ -1,0 +1,8 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="20" fill="#2563EB"/>
+  <circle cx="64" cy="44" r="12" fill="white"/>
+  <rect x="44" y="64" width="40" height="8" rx="4" fill="white"/>
+  <rect x="36" y="80" width="56" height="8" rx="4" fill="white"/>
+  <rect x="40" y="96" width="48" height="8" rx="4" fill="white"/>
+  <text x="64" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">UTM</text>
+</svg>
