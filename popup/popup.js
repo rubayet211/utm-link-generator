@@ -40,7 +40,7 @@ class UTMPopup {
    * Get all DOM elements
    */
   getElements() {
-    return {
+    const elements = {
       // Form elements
       baseUrl: document.getElementById('baseUrl'),
       templateSelect: document.getElementById('templateSelect'),
@@ -91,6 +91,24 @@ class UTMPopup {
       dismissPremiumBtn: document.getElementById('dismissPremiumBtn'),
       upgradePremiumBtn: document.getElementById('upgradePremiumBtn')
     };
+    
+    // Check for missing critical elements and log warnings
+    const criticalElements = ['baseUrl', 'utmSource', 'utmMedium', 'utmCampaign', 'generateBtn'];
+    criticalElements.forEach(elementId => {
+      if (!elements[elementId]) {
+        console.error(`Critical element not found: ${elementId}`);
+      }
+    });
+    
+    // Check for missing validation elements
+    const validationElements = ['sourceValidation', 'mediumValidation', 'campaignValidation'];
+    validationElements.forEach(elementId => {
+      if (!elements[elementId]) {
+        console.warn(`Validation element not found: ${elementId}`);
+      }
+    });
+    
+    return elements;
   }
 
   /**
@@ -190,9 +208,20 @@ class UTMPopup {
       maxLength: 100
     };
 
+    const validationMap = {
+      'utmSource': 'sourceValidation',
+      'utmMedium': 'mediumValidation',
+      'utmCampaign': 'campaignValidation'
+    };
+
     ['utmSource', 'utmMedium', 'utmCampaign'].forEach(field => {
       const input = this.elements[field];
-      const validation = this.elements[field + 'Validation'];
+      const validation = this.elements[validationMap[field]];
+      
+      if (!input || !validation) {
+        console.warn(`Input or validation element not found for field: ${field}`);
+        return;
+      }
       
       input.addEventListener('input', () => {
         const value = input.value.trim();
@@ -222,7 +251,20 @@ class UTMPopup {
    */
   validateField(field) {
     const input = this.elements[field];
-    const validation = this.elements[field + 'Validation'];
+    
+    // Map field names to validation element names
+    const validationMap = {
+      'utmSource': 'sourceValidation',
+      'utmMedium': 'mediumValidation',
+      'utmCampaign': 'campaignValidation'
+    };
+    
+    const validation = this.elements[validationMap[field]];
+    if (!validation) {
+      console.warn(`Validation element not found for field: ${field}`);
+      return true; // Don't fail if validation element is missing
+    }
+    
     const value = input.value.trim();
     
     if (!value && ['utmSource', 'utmMedium', 'utmCampaign'].includes(field)) {
@@ -355,9 +397,16 @@ class UTMPopup {
     
     // Show errors in validation messages
     if (errors.length > 0) {
-      this.elements.sourceValidation.textContent = errors.find(e => e.includes('source')) || '';
-      this.elements.mediumValidation.textContent = errors.find(e => e.includes('medium')) || '';
-      this.elements.campaignValidation.textContent = errors.find(e => e.includes('campaign')) || '';
+      // Safely set validation messages
+      if (this.elements.sourceValidation) {
+        this.elements.sourceValidation.textContent = errors.find(e => e.includes('source')) || '';
+      }
+      if (this.elements.mediumValidation) {
+        this.elements.mediumValidation.textContent = errors.find(e => e.includes('medium')) || '';
+      }
+      if (this.elements.campaignValidation) {
+        this.elements.campaignValidation.textContent = errors.find(e => e.includes('campaign')) || '';
+      }
     }
   }
 
