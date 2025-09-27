@@ -1,9 +1,9 @@
-import { UTM_PARAMS, VALIDATION_RULES, URL_PATTERNS } from '../utils/constants.js';
+// Constants will be available via importScripts
 
 /**
  * Core UTM Link Generation Engine
  */
-export class UTMEngine {
+class UTMEngine {
   constructor() {
     this.validationRules = VALIDATION_RULES;
   }
@@ -433,4 +433,4 @@ export class UTMEngine {
 }
 
 // Create singleton instance
-export const utmEngine = new UTMEngine();
+const utmEngine = new UTMEngine();

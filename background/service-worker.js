@@ -1,9 +1,12 @@
-// Import statements replaced with dynamic imports for Manifest V3 compatibility
-
 /**
  * Background Service Worker for UTM Link Generator
  * Handles message routing, license validation, and premium feature gating
  */
+
+// Import external scripts using importScripts
+importScripts('utm-engine.js');
+importScripts('../utils/storage.js');
+importScripts('../utils/constants.js');
 
 // Initialize extension on startup
 chrome.runtime.onStartup.addListener(async () => {
@@ -24,7 +27,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
  */
 async function initializeExtension() {
   try {
-    const { storage } = await import('../utils/storage.js');
     await storage.initialize();
     console.log('UTM Link Generator initialized successfully');
   } catch (error) {
@@ -45,8 +47,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 async function handleMessage(message, sender, sendResponse) {
   try {
-    const { MESSAGE_TYPES } = await import('../utils/constants.js');
-    
     switch (message.type) {
       case MESSAGE_TYPES.GENERATE_UTM:
         await handleGenerateUTM(message, sendResponse);
@@ -114,9 +114,6 @@ async function handleMessage(message, sender, sendResponse) {
  */
 async function handleGenerateUTM(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
-    const { utmEngine } = await import('./utm-engine.js');
-    
     const { baseUrl, utmParams, templateId, saveToHistory } = message.data;
     
     // Get user settings
@@ -158,9 +155,6 @@ async function handleGenerateUTM(message, sendResponse) {
  */
 async function handleSaveTemplate(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
-    const { FREE_LIMITS } = await import('../utils/constants.js');
-    
     const { template } = message.data;
     const isPremium = await storage.getIsPremium();
     
@@ -190,7 +184,6 @@ async function handleSaveTemplate(message, sendResponse) {
  */
 async function handleDeleteTemplate(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const { templateId } = message.data;
     const success = await storage.deleteTemplate(templateId);
     sendResponse({ success });
@@ -205,7 +198,6 @@ async function handleDeleteTemplate(message, sendResponse) {
  */
 async function handleGetTemplates(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const templates = await storage.getTemplates();
     sendResponse({ success: true, data: { templates } });
   } catch (error) {
@@ -219,7 +211,6 @@ async function handleGetTemplates(message, sendResponse) {
  */
 async function handleGetSettings(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const settings = await storage.getSettings();
     sendResponse({ success: true, data: { settings } });
   } catch (error) {
@@ -233,7 +224,6 @@ async function handleGetSettings(message, sendResponse) {
  */
 async function handleGetIntegrations(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const integrations = await storage.getIntegrations();
     sendResponse({ success: true, data: { integrations } });
   } catch (error) {
@@ -247,7 +237,6 @@ async function handleGetIntegrations(message, sendResponse) {
  */
 async function handleGetPremiumStatus(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const isPremium = await storage.getIsPremium();
     sendResponse({ success: true, data: { isPremium } });
   } catch (error) {
@@ -261,7 +250,6 @@ async function handleGetPremiumStatus(message, sendResponse) {
  */
 async function handleGetHistory(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const { searchQuery, limit } = message.data || {};
     
     let history;
@@ -287,7 +275,6 @@ async function handleGetHistory(message, sendResponse) {
  */
 async function handleClearHistory(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const success = await storage.clearHistory();
     sendResponse({ success });
   } catch (error) {
@@ -301,7 +288,6 @@ async function handleClearHistory(message, sendResponse) {
  */
 async function handleValidateLicense(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const { licenseKey } = message.data;
     
     // Validate license with remote server
@@ -332,7 +318,6 @@ async function handleValidateLicense(message, sendResponse) {
  */
 async function handleUpdateSettings(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
     const { settings } = message.data;
     const success = await storage.setSettings(settings);
     sendResponse({ success, data: { settings } });
@@ -347,9 +332,6 @@ async function handleUpdateSettings(message, sendResponse) {
  */
 async function handleExportCSV(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
-    const { utmEngine } = await import('./utm-engine.js');
-    
     const isPremium = await storage.getIsPremium();
     
     if (!isPremium) {
@@ -376,8 +358,6 @@ async function handleExportCSV(message, sendResponse) {
  */
 async function handleSyncSheets(message, sendResponse) {
   try {
-    const { storage } = await import('../utils/storage.js');
-    
     const isPremium = await storage.getIsPremium();
     
     if (!isPremium) {
@@ -512,7 +492,6 @@ chrome.alarms.create('cleanup-history', {
  */
 async function performLicenseCheck() {
   try {
-    const { storage } = await import('../utils/storage.js');
     const licenseKey = await storage.getLicenseKey();
     if (licenseKey) {
       try {
@@ -523,7 +502,7 @@ async function performLicenseCheck() {
       }
     }
   } catch (error) {
-    console.error('License check import failed:', error);
+    console.error('License check failed:', error);
   }
 }
 
@@ -532,9 +511,6 @@ async function performLicenseCheck() {
  */
 async function cleanupOldHistory() {
   try {
-    const { storage } = await import('../utils/storage.js');
-    const { FREE_LIMITS } = await import('../utils/constants.js');
-    
     const isPremium = await storage.getIsPremium();
     
     if (!isPremium) {

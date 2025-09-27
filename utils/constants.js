@@ -1,8 +1,8 @@
 // Schema version for data migration
-export const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 1;
 
 // Storage keys
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   TEMPLATES: 'templates',
   HISTORY: 'history',
   SETTINGS: 'settings',
@@ -13,7 +13,7 @@ export const STORAGE_KEYS = {
 };
 
 // Default settings
-export const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS = {
   defaultSource: '',
   defaultMedium: '',
   lowercaseEnforced: true,
@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS = {
 };
 
 // Default templates
-export const DEFAULT_TEMPLATES = [
+const DEFAULT_TEMPLATES = [
   {
     id: 'email-campaign',
     name: 'Email Campaign',
@@ -56,7 +56,7 @@ export const DEFAULT_TEMPLATES = [
 ];
 
 // Validation rules
-export const VALIDATION_RULES = {
+const VALIDATION_RULES = {
   REQUIRED_FIELDS: ['source', 'medium', 'campaign'],
   FORBIDDEN_CHARS: /[<>"`'&\s]/g,
   MAX_LENGTH: 100,
@@ -64,7 +64,7 @@ export const VALIDATION_RULES = {
 };
 
 // UTM parameters
-export const UTM_PARAMS = {
+const UTM_PARAMS = {
   SOURCE: 'utm_source',
   MEDIUM: 'utm_medium',
   CAMPAIGN: 'utm_campaign',
@@ -73,14 +73,14 @@ export const UTM_PARAMS = {
 };
 
 // Free tier limits
-export const FREE_LIMITS = {
+const FREE_LIMITS = {
   HISTORY_SIZE: 50,
   TEMPLATES: 5,
   BULK_GENERATION: 10
 };
 
 // Premium feature flags
-export const PREMIUM_FEATURES = {
+const PREMIUM_FEATURES = {
   UNLIMITED_TEMPLATES: 'unlimited_templates',
   BULK_GENERATION: 'bulk_generation',
   CSV_EXPORT: 'csv_export',
@@ -89,7 +89,7 @@ export const PREMIUM_FEATURES = {
 };
 
 // Notification types
-export const NOTIFICATION_TYPES = {
+const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
   WARNING: 'warning',
@@ -97,7 +97,7 @@ export const NOTIFICATION_TYPES = {
 };
 
 // Common URL patterns for auto-detection
-export const URL_PATTERNS = {
+const URL_PATTERNS = {
   SOCIAL: {
     'facebook.com': { source: 'facebook', medium: 'social' },
     'twitter.com': { source: 'twitter', medium: 'social' },
@@ -117,7 +117,7 @@ export const URL_PATTERNS = {
 };
 
 // Message types for communication between components
-export const MESSAGE_TYPES = {
+const MESSAGE_TYPES = {
   GENERATE_UTM: 'generate_utm',
   SAVE_TEMPLATE: 'save_template',
   DELETE_TEMPLATE: 'delete_template',

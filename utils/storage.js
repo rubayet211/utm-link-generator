@@ -1,9 +1,9 @@
-import { STORAGE_KEYS, SCHEMA_VERSION, DEFAULT_SETTINGS, DEFAULT_TEMPLATES } from './constants.js';
+// Constants will be available via importScripts
 
 /**
  * Storage utility class for Chrome extension storage operations
  */
-export class StorageManager {
+class StorageManager {
   constructor() {
     this.sync = chrome.storage.sync;
     this.local = chrome.storage.local;
@@ -276,4 +276,4 @@ export class StorageManager {
 }
 
 // Create singleton instance
-export const storage = new StorageManager();
+const storage = new StorageManager();
