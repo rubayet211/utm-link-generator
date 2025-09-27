@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator for UTM Link Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-container { margin: 20px 0; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        button { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .instructions { background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>UTM Link Generator - Icon Generator</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click "Generate Icons" button below</li>
+            <li>Right-click each canvas and "Save image as..."</li>
+            <li>Save as: icon-16.png, icon-48.png, icon-128.png</li>
+            <li>Place files in the assets/icons/ directory</li>
+            <li>Update manifest.json to include icon references</li>
+        </ol>
+    </div>
+
+    <button onclick="generateIcons()">Generate Icons</button>
+    
+    <div class="icon-container">
+        <h3>16x16 Icon:</h3>
+        <canvas id="icon16" width="16" height="16"></canvas>
+        
+        <h3>48x48 Icon:</h3>
+        <canvas id="icon48" width="48" height="48"></canvas>
+        
+        <h3>128x128 Icon:</h3>
+        <canvas id="icon128" width="128" height="128"></canvas>
+    </div>
+
+    <script>
+        function generateIcons() {
+            generateIcon('icon16', 16);
+            generateIcon('icon48', 48);
+            generateIcon('icon128', 128);
+        }
+        
+        function generateIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background
+            ctx.fillStyle = '#2563EB';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Border radius effect (simplified)
+            ctx.fillStyle = '#2563EB';
+            ctx.fillRect(0, 0, size, size);
+            
+            // UTM text or symbol based on size
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (size === 16) {
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText('U', size/2, size/2);
+            } else if (size === 48) {
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('UTM', size/2, size/2 - 4);
+                
+                // Add link symbol
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(size/2, size/2 + 8, 4, 0, Math.PI * 2);
+                ctx.stroke();
+            } else { // 128px
+                ctx.font = 'bold 24px Arial';
+                ctx.fillText('UTM', size/2, size/2 - 10);
+                
+                // Add link chain symbol
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(size/2 - 12, size/2 + 15, 8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(size/2 + 12, size/2 + 15, 8, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Connection line
+                ctx.beginPath();
+                ctx.moveTo(size/2 - 4, size/2 + 15);
+                ctx.lineTo(size/2 + 4, size/2 + 15);
+                ctx.stroke();
+            }
+        }
+        
+        // Generate icons on page load
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>

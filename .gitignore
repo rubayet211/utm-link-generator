@@ -1,0 +1,24 @@
+# Development files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+node_modules/
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
+*.zip
+
+# Environment files
+.env
+.env.local
+
+# Generated icons (until proper ones are created)
+assets/icons/*.png
+
+# Chrome extension package
+*.crx
+*.pem

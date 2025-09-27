@@ -1,4 +1,23 @@
-import { MESSAGE_TYPES, UTM_PARAMS } from '../utils/constants.js';
+// Constants defined inline for compatibility
+const MESSAGE_TYPES = {
+  GENERATE_UTM: 'generate_utm',
+  SAVE_TEMPLATE: 'save_template',
+  DELETE_TEMPLATE: 'delete_template',
+  GET_HISTORY: 'get_history',
+  CLEAR_HISTORY: 'clear_history',
+  VALIDATE_LICENSE: 'validate_license',
+  UPDATE_SETTINGS: 'update_settings',
+  EXPORT_CSV: 'export_csv',
+  SYNC_SHEETS: 'sync_sheets'
+};
+
+const UTM_PARAMS = {
+  SOURCE: 'utm_source',
+  MEDIUM: 'utm_medium',
+  CAMPAIGN: 'utm_campaign',
+  TERM: 'utm_term',
+  CONTENT: 'utm_content'
+};
 
 /**
  * UTM Link Generator Popup

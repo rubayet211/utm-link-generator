@@ -47,6 +47,19 @@ body {
   filter: brightness(0) invert(1);
 }
 
+.logo-icon-placeholder {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .logo-text h1 {
   font-size: 24px;
   font-weight: 700;
@@ -699,6 +712,19 @@ body {
 .about-icon {
   width: 80px;
   height: 80px;
+}
+
+.about-icon-placeholder {
+  width: 80px;
+  height: 80px;
+  background: #2563eb;
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .about-info h2 {

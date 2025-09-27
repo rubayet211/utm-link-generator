@@ -1,6 +1,4 @@
-import { storage } from '../utils/storage.js';
-import { utmEngine } from './utm-engine.js';
-import { MESSAGE_TYPES, PREMIUM_FEATURES, FREE_LIMITS } from '../utils/constants.js';
+// Import statements replaced with dynamic imports for Manifest V3 compatibility
 
 /**
  * Background Service Worker for UTM Link Generator
@@ -26,6 +24,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
  */
 async function initializeExtension() {
   try {
+    const { storage } = await import('../utils/storage.js');
     await storage.initialize();
     console.log('UTM Link Generator initialized successfully');
   } catch (error) {
@@ -46,6 +45,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 async function handleMessage(message, sender, sendResponse) {
   try {
+    const { MESSAGE_TYPES } = await import('../utils/constants.js');
+    
     switch (message.type) {
       case MESSAGE_TYPES.GENERATE_UTM:
         await handleGenerateUTM(message, sendResponse);
@@ -83,6 +84,22 @@ async function handleMessage(message, sender, sendResponse) {
         await handleSyncSheets(message, sendResponse);
         break;
         
+      case 'get_templates':
+        await handleGetTemplates(message, sendResponse);
+        break;
+        
+      case 'get_settings':
+        await handleGetSettings(message, sendResponse);
+        break;
+        
+      case 'get_integrations':
+        await handleGetIntegrations(message, sendResponse);
+        break;
+        
+      case 'get_premium_status':
+        await handleGetPremiumStatus(message, sendResponse);
+        break;
+        
       default:
         sendResponse({ success: false, error: 'Unknown message type' });
     }
@@ -96,106 +113,197 @@ async function handleMessage(message, sender, sendResponse) {
  * Handle UTM generation request
  */
 async function handleGenerateUTM(message, sendResponse) {
-  const { baseUrl, utmParams, templateId, saveToHistory } = message.data;
-  
-  // Get user settings
-  const settings = await storage.getSettings();
-  
-  // Generate UTM URL
-  const result = utmEngine.generateUTMUrl(baseUrl, utmParams, settings);
-  
-  if (result.success && saveToHistory) {
-    // Save to history
-    await storage.addToHistory({
-      url: baseUrl,
-      utmUrl: result.url,
-      templateId: templateId || null,
-      createdBy: 'user'
-    });
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { utmEngine } = await import('./utm-engine.js');
     
-    // Copy to clipboard if auto-copy is enabled
-    if (settings.autoCopy) {
-      try {
-        await copyToClipboard(result.url);
-        result.copiedToClipboard = true;
-      } catch (error) {
-        console.error('Clipboard copy failed:', error);
-        result.copiedToClipboard = false;
+    const { baseUrl, utmParams, templateId, saveToHistory } = message.data;
+    
+    // Get user settings
+    const settings = await storage.getSettings();
+    
+    // Generate UTM URL
+    const result = utmEngine.generateUTMUrl(baseUrl, utmParams, settings);
+    
+    if (result.success && saveToHistory) {
+      // Save to history
+      await storage.addToHistory({
+        url: baseUrl,
+        utmUrl: result.url,
+        templateId: templateId || null,
+        createdBy: 'user'
+      });
+      
+      // Copy to clipboard if auto-copy is enabled
+      if (settings.autoCopy) {
+        try {
+          await copyToClipboard(result.url);
+          result.copiedToClipboard = true;
+        } catch (error) {
+          console.error('Clipboard copy failed:', error);
+          result.copiedToClipboard = false;
+        }
       }
     }
+    
+    sendResponse({ success: true, data: result });
+  } catch (error) {
+    console.error('UTM generation error:', error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  sendResponse({ success: true, data: result });
 }
 
 /**
  * Handle template save request
  */
 async function handleSaveTemplate(message, sendResponse) {
-  const { template } = message.data;
-  const isPremium = await storage.getIsPremium();
-  
-  // Check premium limits
-  if (!isPremium) {
-    const templates = await storage.getTemplates();
-    if (templates.length >= FREE_LIMITS.TEMPLATES) {
-      sendResponse({
-        success: false,
-        error: 'Free tier limited to 5 templates. Upgrade to Pro for unlimited templates.',
-        requiresPremium: true
-      });
-      return;
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { FREE_LIMITS } = await import('../utils/constants.js');
+    
+    const { template } = message.data;
+    const isPremium = await storage.getIsPremium();
+    
+    // Check premium limits
+    if (!isPremium) {
+      const templates = await storage.getTemplates();
+      if (templates.length >= FREE_LIMITS.TEMPLATES) {
+        sendResponse({
+          success: false,
+          error: 'Free tier limited to 5 templates. Upgrade to Pro for unlimited templates.',
+          requiresPremium: true
+        });
+        return;
+      }
     }
+    
+    const success = await storage.addTemplate(template);
+    sendResponse({ success, data: { template } });
+  } catch (error) {
+    console.error('Template save error:', error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  const success = await storage.addTemplate(template);
-  sendResponse({ success, data: { template } });
 }
 
 /**
  * Handle template deletion
  */
 async function handleDeleteTemplate(message, sendResponse) {
-  const { templateId } = message.data;
-  const success = await storage.deleteTemplate(templateId);
-  sendResponse({ success });
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { templateId } = message.data;
+    const success = await storage.deleteTemplate(templateId);
+    sendResponse({ success });
+  } catch (error) {
+    console.error('Template delete error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * Handle get templates request
+ */
+async function handleGetTemplates(message, sendResponse) {
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const templates = await storage.getTemplates();
+    sendResponse({ success: true, data: { templates } });
+  } catch (error) {
+    console.error('Get templates error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * Handle get settings request
+ */
+async function handleGetSettings(message, sendResponse) {
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const settings = await storage.getSettings();
+    sendResponse({ success: true, data: { settings } });
+  } catch (error) {
+    console.error('Get settings error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * Handle get integrations request
+ */
+async function handleGetIntegrations(message, sendResponse) {
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const integrations = await storage.getIntegrations();
+    sendResponse({ success: true, data: { integrations } });
+  } catch (error) {
+    console.error('Get integrations error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * Handle get premium status request
+ */
+async function handleGetPremiumStatus(message, sendResponse) {
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const isPremium = await storage.getIsPremium();
+    sendResponse({ success: true, data: { isPremium } });
+  } catch (error) {
+    console.error('Get premium status error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
 }
 
 /**
  * Handle history retrieval
  */
 async function handleGetHistory(message, sendResponse) {
-  const { searchQuery, limit } = message.data || {};
-  
-  let history;
-  if (searchQuery) {
-    history = await storage.searchHistory(searchQuery);
-  } else {
-    history = await storage.getHistory();
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { searchQuery, limit } = message.data || {};
+    
+    let history;
+    if (searchQuery) {
+      history = await storage.searchHistory(searchQuery);
+    } else {
+      history = await storage.getHistory();
+    }
+    
+    if (limit) {
+      history = history.slice(0, limit);
+    }
+    
+    sendResponse({ success: true, data: { history } });
+  } catch (error) {
+    console.error('Get history error:', error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  if (limit) {
-    history = history.slice(0, limit);
-  }
-  
-  sendResponse({ success: true, data: { history } });
 }
 
 /**
  * Handle history clearing
  */
 async function handleClearHistory(message, sendResponse) {
-  const success = await storage.clearHistory();
-  sendResponse({ success });
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const success = await storage.clearHistory();
+    sendResponse({ success });
+  } catch (error) {
+    console.error('Clear history error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
 }
 
 /**
  * Handle license validation
  */
 async function handleValidateLicense(message, sendResponse) {
-  const { licenseKey } = message.data;
-  
   try {
+    const { storage } = await import('../utils/storage.js');
+    const { licenseKey } = message.data;
+    
     // Validate license with remote server
     const isValid = await validateLicenseKey(licenseKey);
     
@@ -206,7 +314,7 @@ async function handleValidateLicense(message, sendResponse) {
       // Show success notification
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'assets/icons/icon-48.png',
+        iconUrl: chrome.runtime.getURL('assets/icons/icon.svg'),
         title: 'License Activated',
         message: 'Premium features are now available!'
       });
@@ -214,6 +322,7 @@ async function handleValidateLicense(message, sendResponse) {
     
     sendResponse({ success: true, data: { isValid, isPremium: isValid } });
   } catch (error) {
+    console.error('License validation error:', error);
     sendResponse({ success: false, error: error.message });
   }
 }
@@ -222,48 +331,64 @@ async function handleValidateLicense(message, sendResponse) {
  * Handle settings update
  */
 async function handleUpdateSettings(message, sendResponse) {
-  const { settings } = message.data;
-  const success = await storage.setSettings(settings);
-  sendResponse({ success, data: { settings } });
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { settings } = message.data;
+    const success = await storage.setSettings(settings);
+    sendResponse({ success, data: { settings } });
+  } catch (error) {
+    console.error('Update settings error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
 }
 
 /**
  * Handle CSV export
  */
 async function handleExportCSV(message, sendResponse) {
-  const isPremium = await storage.getIsPremium();
-  
-  if (!isPremium) {
-    sendResponse({
-      success: false,
-      error: 'CSV export requires Pro subscription',
-      requiresPremium: true
-    });
-    return;
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { utmEngine } = await import('./utm-engine.js');
+    
+    const isPremium = await storage.getIsPremium();
+    
+    if (!isPremium) {
+      sendResponse({
+        success: false,
+        error: 'CSV export requires Pro subscription',
+        requiresPremium: true
+      });
+      return;
+    }
+    
+    const history = await storage.getHistory();
+    const csvContent = utmEngine.exportToCSV(history);
+    
+    sendResponse({ success: true, data: { csvContent } });
+  } catch (error) {
+    console.error('CSV export error:', error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  const history = await storage.getHistory();
-  const csvContent = utmEngine.exportToCSV(history);
-  
-  sendResponse({ success: true, data: { csvContent } });
 }
 
 /**
  * Handle Google Sheets sync
  */
 async function handleSyncSheets(message, sendResponse) {
-  const isPremium = await storage.getIsPremium();
-  
-  if (!isPremium) {
-    sendResponse({
-      success: false,
-      error: 'Google Sheets integration requires Pro subscription',
-      requiresPremium: true
-    });
-    return;
-  }
-  
   try {
+    const { storage } = await import('../utils/storage.js');
+    
+    const isPremium = await storage.getIsPremium();
+    
+    if (!isPremium) {
+      sendResponse({
+        success: false,
+        error: 'Google Sheets integration requires Pro subscription',
+        requiresPremium: true
+      });
+      return;
+    }
+    
     const { sheetId, data } = message.data;
     const result = await syncToGoogleSheets(sheetId, data);
     
@@ -274,6 +399,7 @@ async function handleSyncSheets(message, sendResponse) {
     
     sendResponse({ success: true, data: result });
   } catch (error) {
+    console.error('Sheets sync error:', error);
     sendResponse({ success: false, error: error.message });
   }
 }
@@ -385,14 +511,19 @@ chrome.alarms.create('cleanup-history', {
  * Perform periodic license validation
  */
 async function performLicenseCheck() {
-  const licenseKey = await storage.getLicenseKey();
-  if (licenseKey) {
-    try {
-      const isValid = await validateLicenseKey(licenseKey);
-      await storage.setIsPremium(isValid);
-    } catch (error) {
-      console.error('License check failed:', error);
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const licenseKey = await storage.getLicenseKey();
+    if (licenseKey) {
+      try {
+        const isValid = await validateLicenseKey(licenseKey);
+        await storage.setIsPremium(isValid);
+      } catch (error) {
+        console.error('License check failed:', error);
+      }
     }
+  } catch (error) {
+    console.error('License check import failed:', error);
   }
 }
 
@@ -400,14 +531,21 @@ async function performLicenseCheck() {
  * Clean up old history entries
  */
 async function cleanupOldHistory() {
-  const isPremium = await storage.getIsPremium();
-  
-  if (!isPremium) {
-    const history = await storage.getHistory();
-    if (history.length > FREE_LIMITS.HISTORY_SIZE) {
-      const trimmed = history.slice(0, FREE_LIMITS.HISTORY_SIZE);
-      await storage.setHistory(trimmed);
+  try {
+    const { storage } = await import('../utils/storage.js');
+    const { FREE_LIMITS } = await import('../utils/constants.js');
+    
+    const isPremium = await storage.getIsPremium();
+    
+    if (!isPremium) {
+      const history = await storage.getHistory();
+      if (history.length > FREE_LIMITS.HISTORY_SIZE) {
+        const trimmed = history.slice(0, FREE_LIMITS.HISTORY_SIZE);
+        await storage.setHistory(trimmed);
+      }
     }
+  } catch (error) {
+    console.error('History cleanup failed:', error);
   }
 }
 

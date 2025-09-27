@@ -1,4 +1,16 @@
-import { MESSAGE_TYPES } from '../utils/constants.js';
+// Constants defined inline for compatibility
+const MESSAGE_TYPES = {
+  GENERATE_UTM: 'generate_utm',
+  SAVE_TEMPLATE: 'save_template',
+  DELETE_TEMPLATE: 'delete_template',
+  GET_HISTORY: 'get_history',
+  CLEAR_HISTORY: 'clear_history',
+  VALIDATE_LICENSE: 'validate_license',
+  UPDATE_SETTINGS: 'update_settings',
+  EXPORT_CSV: 'export_csv',
+  SYNC_SHEETS: 'sync_sheets',
+  UPDATE_TEMPLATE: 'update_template'
+};
 
 /**
  * UTM Link Generator Options Page
