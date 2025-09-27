@@ -550,16 +550,8 @@ async function handleGenerateUTM(message, sendResponse) {
         createdBy: 'user'
       });
       
-      // Copy to clipboard if auto-copy is enabled
-      if (settings.autoCopy) {
-        try {
-          await copyToClipboard(result.url);
-          result.copiedToClipboard = true;
-        } catch (error) {
-          console.error('Clipboard copy failed:', error);
-          result.copiedToClipboard = false;
-        }
-      }
+      // Let the popup handle clipboard operations
+      result.shouldCopyToClipboard = settings.autoCopy;
     }
     
     sendResponse({ success: true, data: result });
@@ -816,27 +808,7 @@ async function validateLicenseKey(licenseKey) {
   });
 }
 
-/**
- * Copy text to clipboard
- */
-async function copyToClipboard(text) {
-  try {
-    // Get active tab
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // Execute script to copy to clipboard
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: (textToCopy) => {
-        navigator.clipboard.writeText(textToCopy);
-      },
-      args: [text]
-    });
-  } catch (error) {
-    console.error('Clipboard copy failed:', error);
-    throw error;
-  }
-}
+// Clipboard operations moved to popup for better security and reliability
 
 /**
  * Sync data to Google Sheets

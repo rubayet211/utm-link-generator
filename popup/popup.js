@@ -305,6 +305,17 @@ class UTMPopup {
       });
       
       if (response.success && response.data.success) {
+        // Handle clipboard copy if needed
+        if (response.data.shouldCopyToClipboard) {
+          try {
+            await this.copyToClipboard(response.data.url);
+            response.data.copiedToClipboard = true;
+          } catch (error) {
+            console.error('Clipboard copy failed:', error);
+            response.data.copiedToClipboard = false;
+          }
+        }
+        
         this.showResult(response.data);
         await this.loadData(); // Refresh history
       } else {
@@ -547,10 +558,11 @@ class UTMPopup {
   /**
    * Copy to clipboard
    */
-  async copyToClipboard() {
+  async copyToClipboard(text) {
     try {
-      const url = this.elements.generatedUrl.textContent;
-      await navigator.clipboard.writeText(url);
+      // If no text provided, get from the generated URL display
+      const textToCopy = text || this.elements.generatedUrl.textContent;
+      await navigator.clipboard.writeText(textToCopy);
       
       // Show success feedback
       this.elements.successMessage.innerHTML = `
@@ -561,6 +573,7 @@ class UTMPopup {
       `;
     } catch (error) {
       console.error('Copy failed:', error);
+      throw error; // Re-throw so caller can handle
     }
   }
 
@@ -806,8 +819,10 @@ class UTMPopup {
       try {
         await navigator.clipboard.writeText(item.utmUrl);
         // Show brief success indication
+        this.showNotification && this.showNotification('Copied to clipboard!', 'success');
       } catch (error) {
         console.error('Copy failed:', error);
+        this.showNotification && this.showNotification('Copy failed', 'error');
       }
     }
   }
