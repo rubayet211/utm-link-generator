@@ -3,10 +3,429 @@
  * Handles message routing, license validation, and premium feature gating
  */
 
-// Import external scripts using importScripts
-importScripts('utm-engine.js');
-importScripts('../utils/storage.js');
-importScripts('../utils/constants.js');
+// Define constants inline to avoid importScripts path issues
+const MESSAGE_TYPES = {
+  GENERATE_UTM: 'generate_utm',
+  SAVE_TEMPLATE: 'save_template',
+  DELETE_TEMPLATE: 'delete_template',
+  GET_HISTORY: 'get_history',
+  CLEAR_HISTORY: 'clear_history',
+  VALIDATE_LICENSE: 'validate_license',
+  UPDATE_SETTINGS: 'update_settings',
+  EXPORT_CSV: 'export_csv',
+  SYNC_SHEETS: 'sync_sheets'
+};
+
+const FREE_LIMITS = {
+  HISTORY_SIZE: 50,
+  TEMPLATES: 5,
+  BULK_GENERATION: 10
+};
+
+const PREMIUM_FEATURES = {
+  UNLIMITED_TEMPLATES: 'unlimited_templates',
+  BULK_GENERATION: 'bulk_generation',
+  CSV_EXPORT: 'csv_export',
+  GOOGLE_SHEETS: 'google_sheets',
+  TEAM_SHARING: 'team_sharing'
+};
+
+// Storage configuration
+const STORAGE_KEYS = {
+  TEMPLATES: 'templates',
+  HISTORY: 'history',
+  SETTINGS: 'settings',
+  INTEGRATIONS: 'integrations',
+  IS_PREMIUM: 'isPremium',
+  LICENSE_KEY: 'licenseKey',
+  SCHEMA_VERSION: 'schemaVersion'
+};
+
+const SCHEMA_VERSION = 1;
+
+const DEFAULT_SETTINGS = {
+  defaultSource: '',
+  defaultMedium: '',
+  lowercaseEnforced: true,
+  hyphenateSpaces: true,
+  autoCopy: true
+};
+
+const DEFAULT_TEMPLATES = [
+  {
+    id: 'email-campaign',
+    name: 'Email Campaign',
+    fields: {
+      source: 'email',
+      medium: 'email',
+      campaignPattern: 'newsletter-{date}'
+    },
+    createdAt: Date.now()
+  },
+  {
+    id: 'social-media',
+    name: 'Social Media',
+    fields: {
+      source: 'social',
+      medium: 'social',
+      campaignPattern: 'social-{platform}'
+    },
+    createdAt: Date.now()
+  },
+  {
+    id: 'paid-search',
+    name: 'Paid Search',
+    fields: {
+      source: 'google',
+      medium: 'cpc',
+      campaignPattern: 'search-{keyword}'
+    },
+    createdAt: Date.now()
+  }
+];
+
+// UTM Parameters
+const UTM_PARAMS = {
+  SOURCE: 'utm_source',
+  MEDIUM: 'utm_medium',
+  CAMPAIGN: 'utm_campaign',
+  TERM: 'utm_term',
+  CONTENT: 'utm_content'
+};
+
+const VALIDATION_RULES = {
+  REQUIRED_FIELDS: ['source', 'medium', 'campaign'],
+  FORBIDDEN_CHARS: /[<>"`'&\s]/g,
+  MAX_LENGTH: 100,
+  MIN_LENGTH: 1
+};
+
+// Simplified Storage Manager
+class StorageManager {
+  constructor() {
+    this.sync = chrome.storage.sync;
+    this.local = chrome.storage.local;
+  }
+
+  async initialize() {
+    try {
+      const data = await this.getAll();
+      
+      // Check if migration is needed
+      const currentVersion = data[STORAGE_KEYS.SCHEMA_VERSION] || 0;
+      if (currentVersion < SCHEMA_VERSION) {
+        await this.migrate(currentVersion);
+      }
+
+      // Set defaults if not present
+      if (!data[STORAGE_KEYS.SETTINGS]) {
+        await this.setSettings(DEFAULT_SETTINGS);
+      }
+
+      if (!data[STORAGE_KEYS.TEMPLATES] || data[STORAGE_KEYS.TEMPLATES].length === 0) {
+        await this.setTemplates(DEFAULT_TEMPLATES);
+      }
+
+      if (!data[STORAGE_KEYS.HISTORY]) {
+        await this.setHistory([]);
+      }
+
+      if (!data[STORAGE_KEYS.INTEGRATIONS]) {
+        await this.setIntegrations({
+          googleSheets: { enabled: false, sheetId: '', lastSync: null }
+        });
+      }
+
+      // Set schema version
+      await this.set(STORAGE_KEYS.SCHEMA_VERSION, SCHEMA_VERSION);
+    } catch (error) {
+      console.error('Storage initialization failed:', error);
+      throw error;
+    }
+  }
+
+  async migrate(fromVersion) {
+    console.log(`Migrating storage from version ${fromVersion} to ${SCHEMA_VERSION}`);
+  }
+
+  async get(key, useLocal = false) {
+    try {
+      const storage = useLocal ? this.local : this.sync;
+      const result = await storage.get(key);
+      return result[key];
+    } catch (error) {
+      console.error('Storage get error:', error);
+      return null;
+    }
+  }
+
+  async set(key, value, useLocal = false) {
+    try {
+      const storage = useLocal ? this.local : this.sync;
+      await storage.set({ [key]: value });
+      return true;
+    } catch (error) {
+      console.error('Storage set error:', error);
+      return false;
+    }
+  }
+
+  async getAll(useLocal = false) {
+    try {
+      const storage = useLocal ? this.local : this.sync;
+      return await storage.get();
+    } catch (error) {
+      console.error('Storage getAll error:', error);
+      return {};
+    }
+  }
+
+  async getSettings() {
+    return await this.get(STORAGE_KEYS.SETTINGS) || DEFAULT_SETTINGS;
+  }
+
+  async setSettings(settings) {
+    return await this.set(STORAGE_KEYS.SETTINGS, settings);
+  }
+
+  async getTemplates() {
+    return await this.get(STORAGE_KEYS.TEMPLATES) || [];
+  }
+
+  async setTemplates(templates) {
+    return await this.set(STORAGE_KEYS.TEMPLATES, templates);
+  }
+
+  async addTemplate(template) {
+    const templates = await this.getTemplates();
+    template.id = template.id || `template_${Date.now()}`;
+    template.createdAt = Date.now();
+    templates.push(template);
+    return await this.setTemplates(templates);
+  }
+
+  async deleteTemplate(templateId) {
+    const templates = await this.getTemplates();
+    const filtered = templates.filter(t => t.id !== templateId);
+    return await this.setTemplates(filtered);
+  }
+
+  async getHistory() {
+    return await this.get(STORAGE_KEYS.HISTORY, true) || [];
+  }
+
+  async setHistory(history) {
+    return await this.set(STORAGE_KEYS.HISTORY, history, true);
+  }
+
+  async addToHistory(entry) {
+    const history = await this.getHistory();
+    entry.id = entry.id || `history_${Date.now()}`;
+    entry.createdAt = Date.now();
+    
+    history.unshift(entry);
+    
+    const isPremium = await this.getIsPremium();
+    if (!isPremium && history.length > 50) {
+      history.splice(50);
+    }
+    
+    return await this.setHistory(history);
+  }
+
+  async clearHistory() {
+    return await this.setHistory([]);
+  }
+
+  async searchHistory(query) {
+    const history = await this.getHistory();
+    const lowerQuery = query.toLowerCase();
+    return history.filter(entry => 
+      entry.url.toLowerCase().includes(lowerQuery) ||
+      entry.utmUrl.toLowerCase().includes(lowerQuery) ||
+      (entry.templateId && entry.templateId.toLowerCase().includes(lowerQuery))
+    );
+  }
+
+  async getIntegrations() {
+    return await this.get(STORAGE_KEYS.INTEGRATIONS) || {
+      googleSheets: { enabled: false, sheetId: '', lastSync: null }
+    };
+  }
+
+  async setIntegrations(integrations) {
+    return await this.set(STORAGE_KEYS.INTEGRATIONS, integrations);
+  }
+
+  async getIsPremium() {
+    return await this.get(STORAGE_KEYS.IS_PREMIUM) || false;
+  }
+
+  async setIsPremium(isPremium) {
+    return await this.set(STORAGE_KEYS.IS_PREMIUM, isPremium);
+  }
+
+  async getLicenseKey() {
+    return await this.get(STORAGE_KEYS.LICENSE_KEY) || '';
+  }
+
+  async setLicenseKey(licenseKey) {
+    return await this.set(STORAGE_KEYS.LICENSE_KEY, licenseKey);
+  }
+}
+
+// Simplified UTM Engine
+class UTMEngine {
+  constructor() {
+    this.validationRules = VALIDATION_RULES;
+  }
+
+  generateUTMUrl(baseUrl, utmParams, options = {}) {
+    try {
+      const validation = this.validateInputs(baseUrl, utmParams, options);
+      if (!validation.isValid) {
+        return {
+          success: false,
+          errors: validation.errors,
+          url: null
+        };
+      }
+
+      const cleanParams = this.processParameters(utmParams, options);
+      const url = this.buildUrl(baseUrl, cleanParams);
+      
+      return {
+        success: true,
+        url: url,
+        errors: [],
+        params: cleanParams
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errors: [`UTM generation failed: ${error.message}`],
+        url: null
+      };
+    }
+  }
+
+  validateInputs(baseUrl, utmParams, options) {
+    const errors = [];
+
+    if (!baseUrl || typeof baseUrl !== 'string') {
+      errors.push('Base URL is required');
+    } else {
+      try {
+        new URL(baseUrl);
+      } catch {
+        errors.push('Base URL is not valid');
+      }
+    }
+
+    this.validationRules.REQUIRED_FIELDS.forEach(field => {
+      const paramKey = this.getUTMParamKey(field);
+      if (!utmParams[paramKey] || typeof utmParams[paramKey] !== 'string') {
+        errors.push(`${field} is required`);
+      }
+    });
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  processParameters(utmParams, options) {
+    const processed = {};
+
+    Object.entries(utmParams).forEach(([key, value]) => {
+      if (value && typeof value === 'string') {
+        let cleanValue = value.trim();
+
+        if (options.lowercaseEnforced !== false) {
+          cleanValue = cleanValue.toLowerCase();
+        }
+
+        if (options.hyphenateSpaces !== false) {
+          cleanValue = cleanValue.replace(/\s+/g, '-');
+        }
+
+        cleanValue = cleanValue.replace(this.validationRules.FORBIDDEN_CHARS, '');
+        processed[key] = encodeURIComponent(cleanValue);
+      }
+    });
+
+    return processed;
+  }
+
+  buildUrl(baseUrl, utmParams) {
+    const url = new URL(baseUrl);
+    
+    Object.entries(utmParams).forEach(([key, value]) => {
+      if (value) {
+        url.searchParams.set(key, value);
+      }
+    });
+
+    return url.toString();
+  }
+
+  getUTMParamKey(field) {
+    const mapping = {
+      source: UTM_PARAMS.SOURCE,
+      medium: UTM_PARAMS.MEDIUM,
+      campaign: UTM_PARAMS.CAMPAIGN,
+      term: UTM_PARAMS.TERM,
+      content: UTM_PARAMS.CONTENT
+    };
+    return mapping[field] || field;
+  }
+
+  exportToCSV(data) {
+    const headers = [
+      'Original URL',
+      'UTM URL',
+      'Source',
+      'Medium',
+      'Campaign',
+      'Term',
+      'Content',
+      'Created At',
+      'Template'
+    ];
+
+    const rows = data.map(item => [
+      item.url || '',
+      item.utmUrl || '',
+      this.extractUTMParam(item.utmUrl, UTM_PARAMS.SOURCE),
+      this.extractUTMParam(item.utmUrl, UTM_PARAMS.MEDIUM),
+      this.extractUTMParam(item.utmUrl, UTM_PARAMS.CAMPAIGN),
+      this.extractUTMParam(item.utmUrl, UTM_PARAMS.TERM),
+      this.extractUTMParam(item.utmUrl, UTM_PARAMS.CONTENT),
+      item.createdAt ? new Date(item.createdAt).toISOString() : '',
+      item.templateId || ''
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    return csvContent;
+  }
+
+  extractUTMParam(url, param) {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.searchParams.get(param) || '';
+    } catch {
+      return '';
+    }
+  }
+}
+
+// Create instances
+const storage = new StorageManager();
+const utmEngine = new UTMEngine();
 
 // Initialize extension on startup
 chrome.runtime.onStartup.addListener(async () => {
